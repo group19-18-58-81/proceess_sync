@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <errno.h>
+#include <signal.h>
+
+int cnt;
+
+void CTRL_C_Handler (int sig)
+{
+cnt++;
+printf ("%d. Now we are in CTRL_C_Handler.\n", cnt);
+(void) signal (SIGINT, CTRL_C_Handler);
+} // end method CRTL_C_Handler
+
+main()
+{
+system ("clear");
+
+(void) signal (SIGINT, CTRL_C_Handler);
+sigset_t masking;
+
+cnt=0;
+sigemptyset (&masking);
+sigaddset (&masking, SIGINT);
+
+if (sigprocmask (SIG_BLOCK, &masking, NULL) == -1)
+printf ("An error encountered: %s.\n", strerror(errno));
+
+printf ("Enterend in Critical Section. Last for 5 seconds.\n");
+printf ("Pressing CTRL-C will be useless.\n");
+sleep(5);
+
+printf ("Critical Section is ending now.\n");
+if (sigprocmask (SIG_UNBLOCK, &masking, NULL) == -1)
+printf ("An error encountered: %s.\n", strerror(errno));
+
+while(1); // infinite loop
+} // end main
